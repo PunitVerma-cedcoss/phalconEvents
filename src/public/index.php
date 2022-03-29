@@ -12,6 +12,8 @@ use Phalcon\Db\Adapter\Pdo\Mysql;
 use Phalcon\Config;
 use Phalcon\Logger;
 use Phalcon\Logger\Adapter\Stream as AdaStream;
+use Phalcon\Events\Event;
+use Phalcon\Events\Manager as EventsManager;
 
 $config = new Config([]);
 
@@ -52,6 +54,14 @@ $logger = new Logger(
 );
 $container->set('logger', $logger);
 
+//setting listeners
+$eventsManager = new EventsManager();
+$eventsManager->attach('orderlistener', new App\Listeners\Orderlistener());
+$eventsManager->attach('productlistener', new App\Listeners\Productlistener());
+$container->set(
+    'EventsManager',
+    $eventsManager
+);
 
 
 $container->set(

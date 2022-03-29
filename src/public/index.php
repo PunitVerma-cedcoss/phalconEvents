@@ -10,6 +10,8 @@ use Phalcon\Mvc\Application;
 use Phalcon\Url;
 use Phalcon\Db\Adapter\Pdo\Mysql;
 use Phalcon\Config;
+use Phalcon\Logger;
+use Phalcon\Logger\Adapter\Stream as AdaStream;
 
 $config = new Config([]);
 
@@ -27,9 +29,30 @@ $loader->registerDirs(
     ]
 );
 
+$loader->registerNamespaces(
+    [
+        'App\Components' => APP_PATH . '/components',
+        'App\Listeners' => APP_PATH . '/listeners'
+    ]
+);
+$loader->register();
+
 $loader->register();
 
 $container = new FactoryDefault();
+
+
+// setting logger 🎴
+$adapter = new AdaStream('../storage/log/main.log');
+$logger = new Logger(
+    'messages',
+    [
+        'main' => $adapter,
+    ]
+);
+$container->set('logger', $logger);
+
+
 
 $container->set(
     'view',
@@ -62,9 +85,9 @@ $container->set(
                 'username' => 'root',
                 'password' => 'secret',
                 'dbname'   => 'shop',
-                ]
-            );
-        }
+            ]
+        );
+    }
 );
 
 // $container->set(

@@ -3,6 +3,8 @@
 // echo "<pre>"; print_r($_SERVER); die;
 // $_SERVER["REQUEST_URI"] = str_replace("/phalt/","/",$_SERVER["REQUEST_URI"]);
 // $_GET["_url"] = "/";
+
+use JetBrains\PhpStorm\Internal\ReturnTypeContract;
 use Phalcon\Di\FactoryDefault;
 use Phalcon\Loader;
 use Phalcon\Mvc\View;
@@ -14,6 +16,10 @@ use Phalcon\Logger;
 use Phalcon\Logger\Adapter\Stream as AdaStream;
 use Phalcon\Events\Event;
 use Phalcon\Events\Manager as EventsManager;
+use Phalcon\Acl\Adapter\Memory;
+use Phalcon\Acl\Enum;
+use Phalcon\Acl\Role;
+use Phalcon\Acl\Component;
 
 $config = new Config([]);
 
@@ -58,6 +64,7 @@ $container->set('logger', $logger);
 $eventsManager = new EventsManager();
 $eventsManager->attach('orderlistener', new App\Listeners\Orderlistener());
 $eventsManager->attach('productlistener', new App\Listeners\Productlistener());
+$eventsManager->attach('application:beforeHandleRequest', new App\Listeners\Notificationslistener());
 $container->set(
     'EventsManager',
     $eventsManager
@@ -84,7 +91,7 @@ $container->set(
 
 $application = new Application($container);
 
-
+$eventsManager->fire('application:beforeHandleRequest', $application);
 
 $container->set(
     'db',

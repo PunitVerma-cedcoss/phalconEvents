@@ -1,6 +1,12 @@
 <?php
 
+use Phalcon\Acl\Adapter\Memory as ACLMEM;
+use Phalcon\Acl\Role;
+use Phalcon\Acl\Component;
+
 namespace App\Components;
+
+use Permissions;
 
 class Utilscomponent
 {
@@ -22,4 +28,5 @@ class Utilscomponent
         }
         return $controllers;
     }
+
 }

@@ -1,7 +1,7 @@
 <?php
 
+use App\Components\JwtInit;
 use Phalcon\Mvc\Controller;
-
 
 class AuthController extends Controller
 {
@@ -29,7 +29,7 @@ class AuthController extends Controller
                 // echo "saved";
                 $now = new DateTimeImmutable();
                 $jwtinit = new \App\Components\JwtInit();
-                $token = $jwtinit->init($this->request->getPost()['selectrole'], $now);
+                $token = $jwtinit->init($this->request->getPost()['selectrole'], $now, true);
                 $saveresp->assign(
                     [
                         'token' => $token

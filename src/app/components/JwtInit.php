@@ -8,44 +8,65 @@ use Phalcon\Security\JWT\Builder;
 use Phalcon\Security\JWT\Signer\Hmac;
 use Phalcon\Security\JWT\Token\Parser;
 use Phalcon\Security\JWT\Validator;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class JwtInit extends Injectable
 {
-    public function init($role, $now)
+    public function init($role, $now, $useFireBaseJWT = false)
     {
-        // Defaults to 'sha512'
-        $signer  = new Hmac();
+        if (!$useFireBaseJWT) {
+            // Defaults to 'sha512'
+            $signer  = new Hmac();
 
-        // Builder object
-        $builder = new Builder($signer);
+            // Builder object
+            $builder = new Builder($signer);
 
-        $now        = $now;
-        $issued     = $now->getTimestamp();
-        $notBefore  = $now->modify('-1 minute')->getTimestamp();
-        $expires    = $now->modify('+1 day')->getTimestamp();
-        $passphrase = 'QcMpZ&b&mo3TPsPk668J6QH8JA$&U&m2';
+            $now        = $now;
+            $issued     = $now->getTimestamp();
+            $notBefore  = $now->modify('-1 minute')->getTimestamp();
+            $expires    = $now->modify('+1 day')->getTimestamp();
+            $passphrase = 'QcMpZ&b&mo3TPsPk668J6QH8JA$&U&m2';
 
-        // Setup
-        $builder
-            ->setAudience('https://target.phalcon.io')  // aud
-            ->setContentType('application/json')        // cty - header
-            ->setExpirationTime($expires)               // exp 
-            ->setId('abcd123456789')                    // JTI id 
-            ->setIssuedAt($issued)                      // iat 
-            ->setIssuer('https://phalcon.io')           // iss 
-            ->setNotBefore($notBefore)                  // nbf
-            ->setSubject($role)   // sub
-            ->setPassphrase($passphrase)                // password 
-        ;
+            // Setup
+            $builder
+                ->setAudience('https://target.phalcon.io')  // aud
+                ->setContentType('application/json')        // cty - header
+                ->setExpirationTime($expires)               // exp 
+                ->setId('abcd123456789')                    // JTI id 
+                ->setIssuedAt($issued)                      // iat 
+                ->setIssuer('https://phalcon.io')           // iss 
+                ->setNotBefore($notBefore)                  // nbf
+                ->setSubject($role)   // sub
+                ->setPassphrase($passphrase)                // password 
+            ;
 
-        // Phalcon\Security\JWT\Token\Token object
-        $tokenObject = $builder->getToken();
+            // Phalcon\Security\JWT\Token\Token object
+            $tokenObject = $builder->getToken();
 
-        echo $tokenObject->getToken();
-        // die();
+            echo $tokenObject->getToken();
+            // die();
 
-        // The token
-        return $tokenObject->getToken();
+            // The token
+            return $tokenObject->getToken();
+        } else {
+            $now = $this->datetime;
+            $key = "QcMpZ&b&mo3TPsPk668J6QH8JA$&U&m2";
+            $payload = array(
+                "iss" => "http://example.org",
+                "aud" => "http://example.com",
+                "email" => "admin@store.com",
+                "password" => "12345",
+                "sub" => "admin",
+                "iat" => $now->getTimestamp(),
+                "nbf" => $now->modify('-1 minute')->getTimestamp(),
+                "exp" => $now->modify('+1 day')->getTimestamp()
+            );
+            $jwt = JWT::encode($payload, $key, 'HS512');
+            $decoded = JWT::decode($jwt, new Key($key, 'HS512'));
+            print_r($jwt);
+            return $jwt;
+        }
     }
     public function jwtValidate($tokenReceived)
     {
@@ -68,6 +89,9 @@ class JwtInit extends Injectable
             // Phalcon\Security\JWT\Token\Token object
             $tokenObject = $parser->parse($tokenReceived);
 
+            // echo "<pre>";
+            // print_r($tokenObject);
+            // echo "</pre>";
             // echo $tokenObject->getClaims()->getPayload()['sub'];
             $resp = $tokenObject->getClaims()->getPayload()['sub'];
             // Phalcon\Security\JWT\Validator object
@@ -80,6 +104,7 @@ class JwtInit extends Injectable
             // ->validateIssuer($issuer)
             // ->validateNotBefore($notBefore)
             // ->validateSignature($signer, $passphrase);
+            // echo "<br> token is valid <br>";
         } catch (\Exception $e) {
             echo "<pre>";
             echo "</pre>";

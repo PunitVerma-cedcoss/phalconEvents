@@ -20,6 +20,8 @@ use Phalcon\Acl\Adapter\Memory;
 use Phalcon\Acl\Enum;
 use Phalcon\Acl\Role;
 use Phalcon\Acl\Component;
+use Phalcon\Mvc\Router;
+
 
 $config = new Config([]);
 
@@ -86,6 +88,15 @@ $container->set(
         $url = new Url();
         $url->setBaseUri('/');
         return $url;
+    }
+);
+
+$container->set(
+    'router',
+    function () {
+        $router = new Router();
+        $router->handle($_GET['_url']);
+        return $router;
     }
 );
 

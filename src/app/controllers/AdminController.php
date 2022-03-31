@@ -58,35 +58,42 @@ class AdminController extends Controller
     }
     public function editAction()
     {
-        $this->assets->addJs('js/role.js');
-        $list = new App\Components\Utilscomponent();
-        $users = new Permissions();
-        $this->view->data = $list->getList();
-        $this->view->name = $users::findFirst(
-            [
-                'conditions' => 'role_name = :name:',
-                'bind' => [
-                    'name' => $this->request->getQuery()["name"]
+        if (isset($this->request->getquery()['name'])) {
+            $this->assets->addJs('js/role.js');
+            $list = new App\Components\Utilscomponent();
+            $users = new Permissions();
+            $this->view->data = $list->getList();
+            $this->view->name = $users::findFirst(
+                [
+                    'conditions' => 'role_name = :name:',
+                    'bind' => [
+                        'name' => $this->request->getQuery()["name"]
+                    ]
                 ]
-            ]
-        )->role_name;
-        $this->view->data2 = json_decode($users::findFirst(
-            [
-                'conditions' => 'role_name = :name:',
-                'bind' => [
-                    'name' => $this->request->getQuery()["name"]
+            )->role_name;
+            $this->view->data2 = json_decode($users::findFirst(
+                [
+                    'conditions' => 'role_name = :name:',
+                    'bind' => [
+                        'name' => $this->request->getQuery()["name"]
+                    ]
                 ]
-            ]
-        )->permissions);
+            )->permissions);
+        }
 
 
         if ($this->request->isPost()) {
+            // echo "<pre>";
+            // print_r($this->request->getPost());
+            // echo "</pre>";
+            // die();
             $controllers = [];
             $actions = [];
             $aclData = [];
             foreach (array_keys($this->request->getPost()) as $keys) {
                 if ($keys != 'name') {
                     $data = explode("<->", $keys);
+                    print_r($data);
                     $controller = substr($data[0], 0, strlen($data[0]) - strlen('Controller'));
                     $action = $data[1];
                     array_push($controllers, $controller);
@@ -110,13 +117,13 @@ class AdminController extends Controller
                 [
                     'conditions' => 'role_name = :name:',
                     'bind' => [
-                        'name' => $this->request->getPost()["rolename"]
+                        'name' => $this->request->getPost()["name"]
                     ]
                 ]
             );
             $s = $perm->assign(
                 [
-                    'role_name' => $this->request->getPost()['rolename'],
+                    'role_name' => $this->request->getPost()['name'],
                     'permissions' => json_encode($aclData)
                 ]
             );
@@ -126,7 +133,7 @@ class AdminController extends Controller
             } else {
                 echo "error";
             }
-            header("location:/admin");
+            header("location:/secure/mkACL?role=admin");
             // die("died");
         }
     }

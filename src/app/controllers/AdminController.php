@@ -11,6 +11,7 @@ class AdminController extends Controller
         $list = new App\Components\Utilscomponent();
         $users = new Permissions();
         $this->view->data2 = $users::find();
+        $this->view->token = $this->request->getQuery()['bearer'];
         $this->view->data = $list->getList();
         if ($this->request->isPost()) {
             $controllers = [];
@@ -49,7 +50,7 @@ class AdminController extends Controller
             // echo "</pre>";
             // die();
             if ($s->save()) {
-                header("location:/secure/mkACL?role=admin");
+                header("location:/secure/mkACL?bearer=" . $this->request->getQuery()['bearer']);
             }
         }
     }
@@ -63,6 +64,7 @@ class AdminController extends Controller
             $list = new App\Components\Utilscomponent();
             $users = new Permissions();
             $this->view->data = $list->getList();
+            $this->view->token = $this->request->getQuery()['bearer'];
             $this->view->name = $users::findFirst(
                 [
                     'conditions' => 'role_name = :name:',
@@ -133,7 +135,7 @@ class AdminController extends Controller
             } else {
                 echo "error";
             }
-            header("location:/secure/mkACL?role=admin");
+            header("location:/secure/mkACL?bearer=" . $this->request->getQuery()['bearer']);
             // die("died");
         }
     }

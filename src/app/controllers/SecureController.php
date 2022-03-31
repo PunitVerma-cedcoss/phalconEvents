@@ -49,7 +49,7 @@ class SecureController extends Controller
         }
         file_put_contents($aclFile, serialize($acl));
         // die();
-        header("location:/admin?role=admin");
+        header("location:/admin?bearer=" . $this->request->getQuery()['bearer']);
     }
 
     public function BuildACLAction()

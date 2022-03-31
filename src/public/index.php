@@ -100,6 +100,14 @@ $container->set(
     }
 );
 
+$container->set(
+    'datetime',
+    function () {
+        $now = new DateTimeImmutable();
+        return $now;
+    }
+);
+
 $application = new Application($container);
 
 $eventsManager->fire('application:beforeHandleRequest', $application);
